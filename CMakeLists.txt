@@ -141,9 +141,11 @@ set(NABO_SRC
 set(SHARED_LIBS FALSE CACHE BOOL "Set to TRUE to build shared library")
 if (SHARED_LIBS)
 	add_library(${LIB_NAME} SHARED ${NABO_SRC})
+	target_link_libraries(${LIB_NAME} PRIVATE TBB::tbb)
 	install(TARGETS ${LIB_NAME} LIBRARY DESTINATION lib)
 else ()
 	add_library(${LIB_NAME} STATIC ${NABO_SRC})
+	target_link_libraries(${LIB_NAME} PRIVATE TBB::tbb)
 	if (NOT MSVC)
 		target_compile_options(${LIB_NAME} PRIVATE -fPIC)
 	endif()
@@ -158,17 +160,19 @@ target_include_directories(${LIB_NAME} PUBLIC
   )
 
 # openmp
-set(USE_OPEN_MP TRUE CACHE BOOL "Set to FALSE to not use OpenMP")
-if (USE_OPEN_MP)
-	find_package(OpenMP)
-	if (OPENMP_FOUND)
-		target_compile_options(${LIB_NAME} PRIVATE -fopenmp ${OpenMP_CXX_FLAGS})
-		target_compile_definitions(${LIB_NAME} PRIVATE HAVE_OPENMP)
-		if (CMAKE_COMPILER_IS_GNUCC)
-			target_link_libraries(${LIB_NAME} PUBLIC gomp)
-		endif()
-	endif()
-endif ()
+# set(USE_OPEN_MP TRUE CACHE BOOL "Set to FALSE to not use OpenMP")
+# if (USE_OPEN_MP)
+# 	find_package(OpenMP)
+# 	if (OPENMP_FOUND)
+# 		target_compile_options(${LIB_NAME} PRIVATE -fopenmp ${OpenMP_CXX_FLAGS})
+# 		target_compile_definitions(${LIB_NAME} PRIVATE HAVE_OPENMP)
+# 		if (CMAKE_COMPILER_IS_GNUCC)
+# 			target_link_libraries(${LIB_NAME} PUBLIC gomp)
+# 		endif()
+# 	endif()
+# endif ()
+
+find_package(TBB REQUIRED)
 
 
 # create doc before installing

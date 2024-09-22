@@ -38,9 +38,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <queue>
 #include <algorithm>
 #include <utility>
-#ifdef HAVE_OPENMP
-#include <omp.h>
-#endif
+
+#include <tbb/tbb.h>
+
 
 /*!	\file kdtree_cpu.cpp
 	\brief kd-tree search, cpu implementation
@@ -285,22 +285,25 @@ namespace Nabo
 		const int colCount(query.cols());
 		
 		assert(nodes.size() > 0);
-
 		IndexMatrix result(k, query.cols());
-		unsigned long leafTouchedCount(0);
+		std::atomic_uint64_t leafTouchedCount(0);
 
-#pragma omp parallel 
-		{		
-
-		Heap heap(k);
-		std::vector<T> off(dim, 0);
-
-#pragma omp for reduction(+:leafTouchedCount) schedule(guided,32)
-		for (int i = 0; i < colCount; ++i)
-		{
-			leafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
-		}
-		}
+		tbb::parallel_for(tbb::blocked_range<size_t>(0, colCount),
+											[&, this](const tbb::blocked_range<size_t>& r)
+											{
+												Heap heap(k);
+												std::vector<T> off(dim, 0);
+												uint64_t localLeafTouchedCount = 0;
+												for ( size_t i = r.begin(); i != r.end(); ++i )
+												{
+													localLeafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
+												}
+												// localLeafTouchedCount will be zero if collectStatistics is false
+												if (localLeafTouchedCount)
+												{
+													leafTouchedCount += localLeafTouchedCount;
+												}
+											});
 		return leafTouchedCount;
 	}
 	
@@ -317,22 +320,26 @@ namespace Nabo
 		
 		assert(nodes.size() > 0);
 		IndexMatrix result(k, query.cols());
-		unsigned long leafTouchedCount(0);
+		std::atomic_uint64_t leafTouchedCount(0);
 
-#pragma omp parallel 
-		{		
-
-		Heap heap(k);
-		std::vector<T> off(dim, 0);
-		
-#pragma omp for reduction(+:leafTouchedCount) schedule(guided,32)
-		for (int i = 0; i < colCount; ++i)
-		{
-			const T maxRadius(maxRadii[i]);
-			const T maxRadius2(maxRadius * maxRadius);
-			leafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
-		}
-		}
+		tbb::parallel_for(tbb::blocked_range<size_t>(0, colCount),
+											[&, this](const tbb::blocked_range<size_t>& r)
+											{
+												Heap heap(k);
+												std::vector<T> off(dim, 0);
+												uint64_t localLeafTouchedCount = 0;
+												for ( size_t i = r.begin(); i != r.end(); ++i )
+												{
+													const T maxRadius(maxRadii[i]);
+													const T maxRadius2(maxRadius * maxRadius);
+													localLeafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
+												}
+												// localLeafTouchedCount will be zero if collectStatistics is false
+												if (localLeafTouchedCount)
+												{
+													leafTouchedCount += localLeafTouchedCount;
+												}
+											});
 		return leafTouchedCount;
 	}
 	
