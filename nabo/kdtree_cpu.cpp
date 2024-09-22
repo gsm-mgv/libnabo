@@ -286,13 +286,13 @@ namespace Nabo
 		
 		assert(nodes.size() > 0);
 		IndexMatrix result(k, query.cols());
-		std::atomic_uint64_t leafTouchedCount(0);
+		std::atomic_ulong leafTouchedCount(0);
 		tbb::parallel_for(tbb::blocked_range<size_t>(0, colCount),
 											[&, this](const tbb::blocked_range<size_t>& r)
 											{
 												Heap heap(k);
 												std::vector<T> off(dim, 0);
-												uint64_t localLeafTouchedCount = 0;
+												unsigned long localLeafTouchedCount = 0;
 												for ( size_t i = r.begin(); i != r.end(); ++i )
 												{
 													localLeafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
@@ -318,13 +318,13 @@ namespace Nabo
 		
 		assert(nodes.size() > 0);
 		IndexMatrix result(k, query.cols());
-		std::atomic_uint64_t leafTouchedCount(0);
+		std::atomic_ulong leafTouchedCount(0);
 		tbb::parallel_for(tbb::blocked_range<size_t>(0, colCount),
 											[&, this](const tbb::blocked_range<size_t>& r)
 											{
 												Heap heap(k);
 												std::vector<T> off(dim, 0);
-												uint64_t localLeafTouchedCount = 0;
+												unsigned long localLeafTouchedCount = 0;
 												for ( size_t i = r.begin(); i != r.end(); ++i )
 												{
 													const T maxRadius(maxRadii[i]);
