@@ -287,7 +287,6 @@ namespace Nabo
 		assert(nodes.size() > 0);
 		IndexMatrix result(k, query.cols());
 		std::atomic_uint64_t leafTouchedCount(0);
-
 		tbb::parallel_for(tbb::blocked_range<size_t>(0, colCount),
 											[&, this](const tbb::blocked_range<size_t>& r)
 											{
@@ -298,7 +297,6 @@ namespace Nabo
 												{
 													localLeafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
 												}
-												// localLeafTouchedCount will be zero if collectStatistics is false
 												if (localLeafTouchedCount)
 												{
 													leafTouchedCount += localLeafTouchedCount;
@@ -321,7 +319,6 @@ namespace Nabo
 		assert(nodes.size() > 0);
 		IndexMatrix result(k, query.cols());
 		std::atomic_uint64_t leafTouchedCount(0);
-
 		tbb::parallel_for(tbb::blocked_range<size_t>(0, colCount),
 											[&, this](const tbb::blocked_range<size_t>& r)
 											{
@@ -334,7 +331,6 @@ namespace Nabo
 													const T maxRadius2(maxRadius * maxRadius);
 													localLeafTouchedCount += onePointKnn(query, indices, dists2, i, heap, off, maxError2, maxRadius2, allowSelfMatch, collectStatistics, sortResults);
 												}
-												// localLeafTouchedCount will be zero if collectStatistics is false
 												if (localLeafTouchedCount)
 												{
 													leafTouchedCount += localLeafTouchedCount;

@@ -159,19 +159,6 @@ target_include_directories(${LIB_NAME} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   )
 
-# openmp
-# set(USE_OPEN_MP TRUE CACHE BOOL "Set to FALSE to not use OpenMP")
-# if (USE_OPEN_MP)
-# 	find_package(OpenMP)
-# 	if (OPENMP_FOUND)
-# 		target_compile_options(${LIB_NAME} PRIVATE -fopenmp ${OpenMP_CXX_FLAGS})
-# 		target_compile_definitions(${LIB_NAME} PRIVATE HAVE_OPENMP)
-# 		if (CMAKE_COMPILER_IS_GNUCC)
-# 			target_link_libraries(${LIB_NAME} PUBLIC gomp)
-# 		endif()
-# 	endif()
-# endif ()
-
 find_package(TBB REQUIRED)
 
 
